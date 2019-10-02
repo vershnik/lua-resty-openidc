@@ -1446,6 +1446,12 @@ function openidc.authenticate(opts, target_url, unauth_action, session_opts)
       return nil, err, session.data.original_url, session
     end
 
+    if token_expired then
+      -- if token has expired and could not be automatically refreshed - session should not be considered as authenticated
+      -- it will prevent trying to refresh access token second time
+      session.data.authenticated = false
+    end
+
     log(DEBUG, "Authentication is required - Redirecting to OP Authorization endpoint")
     openidc_authorize(opts, session, target_url, opts.prompt)
     return nil, nil, target_url, session
