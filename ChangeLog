@@ -1,3 +1,6 @@
+01/28/2021
+- handle session saving error in openidc_authorize()
+
 12/05/2020
 - fixed a session leak in access_token() and for a very unlikely
   code-path in authenticate(); authenticate will still normally not

@@ -376,7 +376,16 @@ local function openidc_authorize(opts, session, target_url, prompt)
     opts.lifecycle.on_created(session)
   end
 
-  session:save()
+  local ok, err = session:save()
+  -- save may fail in concurrent environment
+  -- no need to redirect user to authorization_endpoint if session state can not be restored later when user comes back from the authorization_endpoint
+  if not ok then
+    log(ERROR, "error saving session" .. err)
+    ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
+    ngx.header["Content-Type"] = "text/html"
+    ngx.say("<html><head><title>Internal error</title></head><body>" .. err .. "</body></html>")
+    ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+  end
 
   -- redirect to the /authorization endpoint
   ngx.header["Cache-Control"] = "no-cache, no-store, max-age=0"
